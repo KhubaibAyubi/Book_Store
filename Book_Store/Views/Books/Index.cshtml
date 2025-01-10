@@ -1,0 +1,43 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model IEnumerable<Book_Store.Models.Books>
+
+
+<h2>Books</h2>
+<div class="container mt-5">
+    <h2>Books</h2>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Price</th>
+                    <th>Publish Date</th>
+                    <th>ISBN</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var book in Model)
+                {
+                    <tr>
+                        <td>@book.Title</td>
+                        <td>@book.Author</td>
+                        <td>@book.Price</td>
+                        <td>@book.PublishDate.ToShortDateString()</td>
+                        <td>@book.ISBN</td>
+                        <td>
+                            @Html.ActionLink("Edit", "Edit", new { id = book.Id }) |
+                            @Html.ActionLink("Delete", "Delete", new { id = book.Id })
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <a href="@Url.Action("Create", "Books")" class="btn btn-primary">Add New Book</a>
+</div>
