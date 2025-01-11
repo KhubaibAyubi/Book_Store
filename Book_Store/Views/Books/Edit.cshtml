@@ -6,28 +6,28 @@
 }
 
 
-@using (Html.BeginForm())
+@using (Html.BeginForm("Edit", "Books", new { id = Model.Id }, FormMethod.Post))
 {
     @Html.AntiForgeryToken()
 
     <div class="container mt-4">
         <div class="card shadow-sm">
             <div class="card-header bg-dark text-white">
-                <h2 class="mb-0">Create Book</h2>
+                <h2 class="mb-0">Edit Book</h2>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <!-- Title Field -->
                     <div class="col-md-6">
                         @Html.LabelFor(model => model.Title, new { @class = "form-label" })
-                        @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control", placeholder = "Enter the title of the book" } })
+                        @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
                         @Html.ValidationMessageFor(model => model.Title, "", new { @class = "custom-validation" })
-                    </div>
+                    </div>  
 
                     <!-- Author Field -->
                     <div class="col-md-6">
                         @Html.LabelFor(model => model.Author, new { @class = "form-label" })
-                        @Html.EditorFor(model => model.Author, new { htmlAttributes = new { @class = "form-control", placeholder = "Enter the Author of the book" } })
+                        @Html.EditorFor(model => model.Author, new { htmlAttributes = new { @class = "form-control" } })
                         @Html.ValidationMessageFor(model => model.Author, "", new { @class = "custom-validation" })
                     </div>
                 </div>
@@ -36,33 +36,34 @@
                     <!-- Price Field -->
                     <div class="col-md-6">
                         @Html.LabelFor(model => model.Price, new { @class = "form-label" })
-                        @Html.EditorFor(model => model.Price, new { htmlAttributes = new { @class = "form-control", placeholder = "Enter the Price of the book" } })
+                        @Html.EditorFor(model => model.Price, new { htmlAttributes = new { @class = "form-control" } })
                         @Html.ValidationMessageFor(model => model.Price, "", new { @class = "custom-validation" })
                     </div>
 
                     <!-- Publish Date Field -->
                     <div class="col-md-6">
-                        @Html.LabelFor(model => model.PublishDate, new { @class = "form-label" })
-                        @Html.EditorFor(model => model.PublishDate, new { htmlAttributes = new { @class = "form-control" } })
+                        <label for="PublishDate" class="form-label">Publish Date</label>
+                        <input type="date" id="PublishDate" name="PublishDate" class="form-control" value="@Model.PublishDate.ToString("yyyy-MM-dd")" />
                         @Html.ValidationMessageFor(model => model.PublishDate, "", new { @class = "custom-validation" })
                     </div>
+
+
                 </div>
 
                 <div class="mb-3">
                     @Html.LabelFor(model => model.ISBN, new { @class = "form-label" })
-                    @Html.EditorFor(model => model.ISBN, new { htmlAttributes = new { @class = "form-control", placeholder = "Enter the ISBN number of the book" } })
+                    @Html.EditorFor(model => model.ISBN, new { htmlAttributes = new { @class = "form-control" } })
                     @Html.ValidationMessageFor(model => model.ISBN, "", new { @class = "custom-validation" })
+
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
-                    <button type="submit" class="btn btn-success px-4">
-                        <i class="bi bi-plus-circle"></i> Create
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-plus-circle"></i> Update
                     </button>
-
                     <a href="@Url.Action("Index", "Books")" class="btn btn-secondary px-4">
                         <i class="bi bi-arrow-left-circle"></i> Back to List
                     </a>
-
                 </div>
             </div>
         </div>

@@ -30,11 +30,23 @@ namespace Book_Store.Models
         // Publish Date of the book - Required and must be a valid date
         [Required(ErrorMessage = "Publish Date is required.")]
         [DataType(DataType.Date)] // Ensures that this field is treated as a date in forms
+        [Display(Name = "Publish Date")]
+        [CustomValidation(typeof(Books), nameof(ValidatePastDate))]
         public DateTime PublishDate { get; set; }
 
         // ISBN of the book - Required and has a maximum length of 13 characters
         [Required(ErrorMessage = "ISBN is required.")]
         [StringLength(13, ErrorMessage = "ISBN cannot exceed 13 characters.")]
         public string ISBN { get; set; }
+
+        public static ValidationResult ValidatePastDate(DateTime date, ValidationContext context)
+        {
+            if (date > DateTime.Now)
+            {
+                return new ValidationResult("Publish Date must be in the past.");
+            }
+            return ValidationResult.Success;
+        }
     }
+
 }

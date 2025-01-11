@@ -3,41 +3,159 @@
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-@model IEnumerable<Book_Store.Models.Books>
+@model Book_Store.ViewModels.BooksViewModel
 
-
-<h2>Books</h2>
 <div class="container mt-5">
-    <h2>Books</h2>
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Author</th>
-                    <th>Price</th>
-                    <th>Publish Date</th>
-                    <th>ISBN</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var book in Model)
-                {
-                    <tr>
-                        <td>@book.Title</td>
-                        <td>@book.Author</td>
-                        <td>@book.Price</td>
-                        <td>@book.PublishDate.ToShortDateString()</td>
-                        <td>@book.ISBN</td>
-                        <td>
-                            @Html.ActionLink("Edit", "Edit", new { id = book.Id }) |
-                            @Html.ActionLink("Delete", "Delete", new { id = book.Id })
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert" id="success-alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["SuccessUpdateMessage"] != null)
+    {
+        <div class="alert alert-primary alert-dismissible fade show" role="alert" id="primary-alert">
+            @TempData["SuccessUpdateMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+
+    <div class="row mb-3 align-items-center">
+        <!-- Add New Book Button (Aligned Left on Desktop) -->
+        <div class="col-12 col-md-auto mb-2 mb-md-0">
+            <a href="@Url.Action("Create", "Books")" class="btn btn-primary">
+                <i class="bi bi-plus-circle-fill"></i> Add New Book
+            </a>
+        </div>
+
+        <!-- Search Form (Aligned Right on Desktop, Stacked on Mobile) -->
+        <div class="col-12 col-md-auto ms-md-auto">
+            @using (Html.BeginForm("Index", "Books", FormMethod.Get))
+            {
+                <div class="d-flex flex-column flex-md-row align-items-center justify-content-end">
+                    <input type="text" name="searchTerm" class="form-control mb-2 mb-md-0" value="@Model.SearchTerm" placeholder="Search by title or author" />
+                    <button type="submit" class="btn btn-primary ml-md-2">
+                        Search
+                    </button>
+                </div>
+            }
+        </div>
     </div>
-    <a href="@Url.Action("Create", "Books")" class="btn btn-primary">Add New Book</a>
 </div>
+<br />
+<br />
+<div class="table-responsive">
+    <table class="table table-striped table-bordered table-hover table-sm">
+        <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Price</th>
+                <th>Publish Date</th>
+                <th>ISBN</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var book in Model.Books)
+            {
+                <tr>
+                    <td>@book.Id</td>
+                    <td>@book.Title</td>
+                    <td>@book.Author</td>
+                    <td>@book.Price</td>
+                    <td>@book.PublishDate.ToShortDateString()</td>
+                    <td>@book.ISBN</td>
+                    <td>
+                        <a href="@Url.Action("Edit", new { id = book.Id })"
+                           class="btn btn-warning btn-sm action-btn"
+                           data-bs-toggle="tooltip"
+                           data-bs-placement="top"
+                           title="Edit Book">
+                            <i class="bi bi-pen-fill"></i> Edit
+                        </a>
+                        
+                        <button class="btn btn-danger btn-sm action-btn"
+                                onclick="confirmDelete(@book.Id, '@book.Title')"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="top"
+                                title="Delete Book">
+                            <i class="bi bi-trash-fill"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+  
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete <strong id="bookTitle"></strong>?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form id="deleteForm" method="post" action="">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Pagination -->
+<div class="d-flex justify-content-center mt-3">
+    <ul class="pagination">
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { page = i, searchTerm = Model.SearchTerm })">@i</a>
+            </li>
+        }
+    </ul>
+</div>
+    </div>
+<script>
+    function confirmDelete(bookId, bookTitle) {
+        // Set the book title in the modal
+        document.getElementById('bookTitle').innerText = bookTitle;
+
+        // Set the action URL for the delete form
+        const form = document.getElementById('deleteForm');
+        form.action = '/Books/Delete/' + bookId;
+
+        // Show the modal
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        deleteModal.show();
+    }
+    if (document.getElementById("success-alert")) {
+        // Set a timeout to hide the alert after 5 seconds (5000 ms)
+        setTimeout(function () {
+            $('#success-alert').alert('close'); // This will close the alert
+        }, 3000); // 5000ms = 5 seconds
+    }
+
+    if (document.getElementById("primary-alert")) {
+        // Set a timeout to hide the alert after 5 seconds (5000 ms)
+        setTimeout(function () {
+            $('#primary-alert').alert('close'); // This will close the alert
+        }, 3000); // 5000ms = 5 seconds
+    }
+    $(document).ready(function () {
+        // Initialize tooltips with custom options
+        $('[data-toggle="tooltip"]').tooltip({
+            trigger: 'hover', // Trigger the tooltip on hover (default is 'hover')
+            delay: { "show": 500, "hide": 100 } // Delay before showing and hiding
+        });
+    });
+</script>
